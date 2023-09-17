@@ -1,0 +1,31 @@
+version: '3'
+services:
+    laravel:
+       build:
+         context: .
+         dockerfile: Dockerfile
+       image: weekly-report
+       container_name: weekly-report
+       restart: unless-stopped
+       working_dir: /var/www/html
+       volumes:
+         - .:/var/www/html
+       ports:
+         - 8055:80
+       environment:
+         - DB_HOST=weekly-report-mysql
+         - DB_PORT=3306
+         - DB_DATABASE=laravel
+         - DB_USERNAME=root
+         - DB_PASSWORD=password
+    mysql:
+     image: mysql:8.0
+     container_name: weekly-report-mysql
+     restart: unless-stopped
+     ports:
+       - 5510:3306
+     environment:
+         MYSQL_DATABASE: laravel
+         MYSQL_ROOT_PASSWORD: "password"
+     volumes:
+       - ./mysql:/var/lib/mysql
