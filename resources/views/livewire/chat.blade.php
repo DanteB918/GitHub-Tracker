@@ -1,8 +1,8 @@
 @php
     use \Carbon\Carbon;
     $now = Carbon::now();
-    $weekStartDate = $now->startOfWeek()->format('Y-m-d');
-    $weekEndDate = $now->endOfWeek()->format('Y-m-d');
+    $weekStartDate = $now->startOfWeek()->format('m-d-Y');
+    $weekEndDate = $now->endOfWeek()->format('m-d-Y');
 @endphp
 
 <div class="text-light">
@@ -37,45 +37,42 @@
 
     <p class="text-light">
         @if( $response )
+            @php
+                $day = [];
+            @endphp
             @foreach($response as $data)
                 @php
                     $commitDate = Carbon::parse($data->commit->author->date)->format('m-d-Y');
                     $x = Carbon::parse($data->commit->author->date)->format('l');
-                    if ( cache()->has('day') ) {
-                        $done = [];
-                        $done[] = cache()->get('day');
-                        if (in_array($x, $done)){
-                            cache()->forget('day');
-                        }
-                    }else{
-                        cache()->put('day', $x, now()->addMinutes(2));
-                    }
                 @endphp
-                @if($commitDate >= $weekStartDate && $commitDate <= $weekEndDate && ! $date)
-                    @if(cache()->has('day'))
-                        <b>{{ cache()->get('day') }}</b><br />
+                @if(! $date)
+                    @if($commitDate >= $weekStartDate && $commitDate <= $weekEndDate)
+                        @if(! in_array($x, $day))
+                            <b>{{ $x }}</b>
+                            @php
+                                $day[] = $x;
+                            @endphp
+                        @endif
+                        <ul>
+                            <li>{{ $data->commit->message }}</li>
+                            <li><a href="{{ $data->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
+                        </ul>
                     @endif
-                    <ul>
-                        <li>{{ $data->commit->message }}</li>
-                        <li><a href="{{ $data->parents[0]->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
-                    </ul>
                 @else
                     @if(Carbon::parse($date)->format('m-d-Y') === $commitDate )
-                        @if(cache()->has('day'))
-                            <b>{{ cache()->get('day') }}</b><br />
-                            <ul>
+                        @if(! in_array($x, $day))
+                            <b>{{ $x }}</b>
+                            @php
+                                $day[] = $x;
+                            @endphp
                         @endif
+                        <ul>
                             <li>{{ $data->commit->message }}</li>
-                            <li><a href="{{ $data->parents[0]->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
-                            @if($loop->last)
-                                </ul>
-                            @endif
+                            <li><a href="{{ $data->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
+                        </ul>
                     @endif
                 @endif
             @endforeach
-            @php
-                cache()->flush();
-            @endphp
         @endif
     </p>
 </div>
