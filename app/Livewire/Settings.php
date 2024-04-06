@@ -25,21 +25,21 @@ class Settings extends Component
             $this->username = GithubApi::first()->username;
             $this->repository = GithubApi::first()->repository;
         }
+
         return view('livewire.settings');
     }
     public function updateOrCreate()
     {
         $this->validate();
-        try{
-            GithubApi::query()->delete();
-            GithubApi::updateOrCreate([
-                'token' => $this->token,
-                'username' => $this->username,
-                'repository' => $this->repository
-            ]);
-        }catch (\Exception $e){
-            abort( $e->getMessage() , 403);
-        }
+
+        GithubApi::query()->delete();
+
+        GithubApi::updateOrCreate([
+            'token' => $this->token,
+            'username' => $this->username,
+            'repository' => $this->repository
+        ]);
+
         $this->status = 'Updated!';
     }
     public function showText()

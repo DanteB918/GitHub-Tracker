@@ -12,7 +12,7 @@
     <em></em>
     <form class="d-flex justify-content-center flex-row" wire:submit="send">
         <div class="mb-3">
-            <input type="date" class="form-control" wire:model="date" />
+            <input type="date" class="form-control" wire:model.defer="date" />
         </div>
         <div class="mx-2">
             <button type="submit" class="btn text-light" style="background-color: crimson;"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -34,44 +34,20 @@
               </div>
         </div>
     </div>
-
     <p class="text-light">
-        @if( $response )
-            @php
-                $day = [];
-            @endphp
-            @foreach($response as $data)
-                @php
-                    $commitDate = Carbon::parse($data->commit->author->date)->format('m-d-Y');
-                    $x = Carbon::parse($data->commit->author->date)->format('l');
-                @endphp
-                @if(! $date)
-                    @if($commitDate >= $weekStartDate && $commitDate <= $weekEndDate)
-                        @if(! in_array($x, $day))
-                            <b>{{ $x }}</b>
-                            @php
-                                $day[] = $x;
-                            @endphp
+        @if(count($response ?? []))
+            @foreach($response as $day => $commit)
+                <p><b>{{ $day }}</b></p>
+                <ul>
+                    @foreach ($commit as $data)
+                        @if ($date && ! Carbon::parse($date)->isSameDay(Carbon::parse($data->commit->author->date)) )
+                            <?php continue; ?>
                         @endif
-                        <ul>
                             <li>{{ $data->commit->message }}</li>
+                            <li>{{ Carbon::parse($data->commit->author->date)->format('m/d/Y') }}</li>
                             <li><a href="{{ $data->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
-                        </ul>
-                    @endif
-                @else
-                    @if(Carbon::parse($date)->format('m-d-Y') === $commitDate )
-                        @if(! in_array($x, $day))
-                            <b>{{ $x }}</b>
-                            @php
-                                $day[] = $x;
-                            @endphp
-                        @endif
-                        <ul>
-                            <li>{{ $data->commit->message }}</li>
-                            <li><a href="{{ $data->html_url }}" target="_blank" style="color: crimson;">See Info</a></li>
-                        </ul>
-                    @endif
-                @endif
+                    @endforeach
+                </ul>
             @endforeach
         @endif
     </p>

@@ -4,8 +4,6 @@ namespace App\Livewire;
 
 use App\Models\GithubApi;
 use Livewire\Component;
-use Illuminate\Support\Facades\Http;
-use GuzzleHttp\Client;
 
 
 class Chat extends Component
