@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use \App\Models\GithubApi;
+use App\Models\GithubApi;
 
 class Settings extends Component
 {
@@ -18,6 +18,7 @@ class Settings extends Component
         'username' => 'required',
         'repository' => 'required',
     ];
+
     public function render()
     {
         if (GithubApi::first()){
@@ -28,6 +29,7 @@ class Settings extends Component
 
         return view('livewire.settings');
     }
+
     public function updateOrCreate()
     {
         $this->validate();
@@ -42,6 +44,7 @@ class Settings extends Component
 
         $this->status = 'Updated!';
     }
+
     public function showText()
     {
         $this->hidden ? $this->hidden = 0 : $this->hidden = 1;
