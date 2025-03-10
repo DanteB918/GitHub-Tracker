@@ -1,31 +1,43 @@
-version: '3'
 services:
-    laravel:
-       build:
-         context: .
-         dockerfile: Dockerfile
-       image: weekly-report
-       container_name: weekly-report
-       restart: unless-stopped
-       working_dir: /var/www/html
-       volumes:
-         - .:/var/www/html
-       ports:
-         - 8055:80
-       environment:
-         - DB_HOST=weekly-report-mysql
-         - DB_PORT=3306
-         - DB_DATABASE=laravel
-         - DB_USERNAME=root
-         - DB_PASSWORD=password
-    mysql:
-     image: mysql:8.0
-     container_name: weekly-report-mysql
-     restart: unless-stopped
-     ports:
-       - 5510:3306
-     environment:
-         MYSQL_DATABASE: laravel
-         MYSQL_ROOT_PASSWORD: "password"
-     volumes:
-       - ./mysql:/var/lib/mysql
+  laravel:
+    build:
+      context: .
+      args:
+        USER_ID: ${UID:-1000}
+      dockerfile: Dockerfile
+    container_name: weekly-report
+    expose:
+      - "9000"
+    volumes:
+      - .:/var/www/app
+    user: "${UID:-1000}:${GID:-1000}"
+  nginx:
+    image: nginx:alpine
+    container_name: weekly-report-nginx
+    ports:
+      - "8030:80"
+    volumes:
+      - ./services/dev/nginx.conf:/etc/nginx/conf.d/default.conf:cached
+      - .:/var/www/app:cached
+    depends_on:
+      - laravel
+  mysql:
+    image: mysql:8.0
+    container_name: weekly-report-mysql
+    ports:
+      - 5505:3306
+    environment:
+        MYSQL_DATABASE: laravel
+        MYSQL_ROOT_PASSWORD: password
+        TZ: America/New York
+    volumes:
+      - ./services/dev/storage:/var/lib/mysql
+  testingdb:
+    image: mysql:8.0
+    container_name: weekly-report-testing
+    ports:
+      - 5506:3306
+    environment:
+        MYSQL_DATABASE: laravel
+        MYSQL_ROOT_PASSWORD: password
+        TZ: America/New York
